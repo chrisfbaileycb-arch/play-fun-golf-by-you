@@ -8,7 +8,7 @@ import { svg } from '../core/util.js';
 export default {
   id: 'knight',
   name: 'Knight Golf',
-  tagline: 'Virtual Topgolf Arcadification & Medieval Combat',
+  tagline: 'Arcade Target Play & Medieval Combat',
   theme: 'knight',
 
   modes: [castleConquest, duelingKnighthood, raidBoss],

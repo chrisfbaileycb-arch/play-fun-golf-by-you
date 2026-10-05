@@ -63,7 +63,7 @@ function buildGeometry(hole) {
   const greenR = par === 3 ? 13 : par === 4 ? 15 : 17;
   const green = { x: pin.x + randRange(rng, -3, 3), y: pin.y + randRange(rng, -2, 4), r: greenR };
 
-  // Landing-zone drop targets (Topgolf-style fairway rings).
+  // Landing-zone drop targets (arcade-style fairway target rings).
   const landingZones = [];
   if (par >= 4) {
     const s1 = Math.min(250, yards * (par === 4 ? 0.62 : 0.45));
@@ -188,7 +188,7 @@ export function classifyPoint(geo, p) {
   return 'ob';
 }
 
-/** Topgolf-style ring for proximity-based scoring. */
+/** Target ring for proximity-based scoring. */
 export function ringFor(geo, p) {
   const d = dist(p, geo.pin);
   if (d <= RING.bullseye) return 'bullseye';

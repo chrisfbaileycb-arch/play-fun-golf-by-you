@@ -1,14 +1,14 @@
-// Mode C: Fairway Sorry!
+// Mode C: Fairway Scram!
 import { dist, clamp, el, clear } from '../core/util.js';
 import { projectToPath, pointAtS } from '../core/fairway.js';
 import { sfx } from '../core/audio.js';
 
 export const sorry = {
   id: 'sorry',
-  name: 'Fairway Sorry!',
-  tagline: 'Pawn race down the fairway with slide zones and brutal bump-backs',
+  name: 'Fairway Scram!',
+  tagline: 'Pawn race down the fairway with slide zones and brutal Scram Bumps',
   icon: '💥',
-  description: 'Pawns race toward the Home Cup! Landing within 15 yards of an opponent triggers a vicious SORRY! bumping their pawn all the way back to the tee box! Slide zones accelerate long drives.',
+  description: 'Pawns race toward the Home Cup! Landing within 15 yards of an opponent triggers a vicious SCRAM BUMP bumping their pawn all the way back to the tee box! Slide zones accelerate long drives.',
   minPlayers: 2,
   maxPlayers: 4,
   needsRival: true,
@@ -72,7 +72,7 @@ export const sorry = {
 
         events.push({ t: 'sfx', name: 'bump' });
         events.push({ t: 'sfx', name: 'sorry' });
-        events.push({ t: 'banner', text: 'SORRY!', sub: `${ctx.player.name} bumped ${opp.name} back to the TEE!`, color: '#ff3b30' });
+        events.push({ t: 'banner', text: 'SCRAM!', sub: `${ctx.player.name} Scram-bumped ${opp.name} back to the TEE!`, color: '#ff3b30' });
         events.push({ t: 'shake', mag: 15 });
         break;
       }
@@ -116,7 +116,7 @@ export const sorry = {
     const rows = game.players.map((p) => {
       const score = game.modeState.pawns?.[p.id]?.score ?? 0;
       const bumps = game.modeState.pawns?.[p.id]?.bumps ?? 0;
-      return { pid: p.id, score, display: `${score} pts (${bumps} Bumps)` };
+      return { pid: p.id, score, display: `${score} pts (${bumps} Scram Bumps)` };
     });
     rows.sort((a, b) => b.score - a.score);
     return rows;
@@ -130,7 +130,7 @@ export const sorry = {
       const ps = game.modeState.pawns?.[p.id] || { pos: 0, bumps: 0 };
       const pct = Math.round((ps.pos / holeYards) * 100);
       wrap.appendChild(el('div', { class: 'kg-panel-cell', style: { borderLeft: `4px solid ${p.color}`, paddingLeft: '8px' } },
-        el('span', { class: 'kg-panel-label' }, `${p.name} · ${ps.bumps} Bumps`),
+        el('span', { class: 'kg-panel-label' }, `${p.name} · ${ps.bumps} Scram Bumps`),
         el('span', { class: 'kg-panel-val' }, `${Math.round(ps.pos)} / ${holeYards} yds (${pct}%)`),
         el('div', { style: { height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', marginTop: '4px', overflow: 'hidden' } },
           el('div', { style: { height: '100%', width: `${pct}%`, background: p.color } }))));

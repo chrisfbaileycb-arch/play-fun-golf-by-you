@@ -44,7 +44,7 @@ test('Fairway Sorry: pawns, slides, and 15-yard bump-back', () => {
   assert.equal(game.modeState.pawns.p1.pos, 0);
   assert.equal(game.modeState.pawns.p1.bumped, 1);
   assert.equal(game.modeState.pawns.p2.bumps, 1);
-  assert.ok(events.some((e) => e.text === 'SORRY!'));
+  assert.ok(events.some((e) => e.text === 'SCRAM!'));
 });
 
 test('Chutes & Ladders: 100-tile climb, ladders, and chutes', () => {

@@ -14,14 +14,17 @@ import { mulberry32 } from '../js/core/util.js';
 setFile('boardwalk');
 
 test('Boardwalk Board: tokens and helpers', () => {
-  assert.equal(TOKENS.length, 4);
-  assert.ok(TOKEN_KINDS.includes('tophat'));
-  assert.ok(TOKEN_KINDS.includes('roadster'));
-  assert.ok(TOKEN_KINDS.includes('scottie'));
-  assert.ok(TOKEN_KINDS.includes('thimble'));
-  assert.equal(tokenLabel('tophat'), 'Top Hat');
-  assert.equal(tokenOf({ token: 'roadster' }), 'roadster');
-  assert.equal(tokenOf({ token: 'invalid' }, 2), 'scottie');
+  assert.equal(TOKENS.length, 6);
+  assert.ok(TOKEN_KINDS.includes('visor'));
+  assert.ok(TOKEN_KINDS.includes('cart'));
+  assert.ok(TOKEN_KINDS.includes('gopher'));
+  assert.ok(TOKEN_KINDS.includes('beercan'));
+  assert.ok(TOKEN_KINDS.includes('mashie'));
+  assert.ok(TOKEN_KINDS.includes('divot'));
+  assert.equal(tokenLabel('visor'), 'The Visor');
+  assert.equal(tokenOf({ token: 'cart' }), 'cart');
+  assert.equal(tokenOf({ token: 'roadster' }), 'cart');
+  assert.equal(tokenOf({ token: 'invalid' }, 2), 'gopher');
 });
 
 test('Battleship: 10x10 grid math and fleet layout', () => {
@@ -136,8 +139,8 @@ test('Turf Monopoly: game initialization and shot deeds', () => {
   });
 
   game.modeState = monopoly.init(game);
-  assert.equal(game.modeState.players.p1.cash, START_CASH);
-  assert.equal(game.modeState.players.p2.cash, START_CASH);
+  assert.equal(game.modeState.cash.p1, START_CASH);
+  assert.equal(game.modeState.cash.p2, START_CASH);
 
   const geo = synthesize(hole);
   // Fairway drive landing on first fairway property segment
@@ -146,6 +149,6 @@ test('Turf Monopoly: game initialization and shot deeds', () => {
   assert.ok(d);
   assert.equal(d.kind, 'fairway');
 
-  const events = monopoly.onShot(game, { player: game.players[0], shot, geo });
+  const events = monopoly.onShot(game, { player: game.players[0], shot, geo, holeIdx: 0 });
   assert.ok(events.length > 0);
 });

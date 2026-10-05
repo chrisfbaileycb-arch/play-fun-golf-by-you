@@ -112,6 +112,21 @@ const SOUNDS = {
   splash: (s) => { s.noise({ dur: 0.6, gain: 0.35, type: 'lowpass', f: 2500, to: 300, q: 0.7 }); s.tone({ f: 180, to: 60, dur: 0.3, gain: 0.2 }); },
   sandThud: (s) => s.noise({ dur: 0.3, gain: 0.35, type: 'lowpass', f: 900, to: 150, q: 0.5 }),
   crowd: (s) => { for (let i = 0; i < 6; i++) s.noise({ dur: 0.9, gain: 0.07, type: 'bandpass', f: 600 + i * 220, q: 3, at: i * 0.04 }); },
+  wind: (s, o = {}) => {
+    const dur = o.dur || 1.8;
+    const gain = o.gain || 0.28;
+    s.noise({ dur, gain, type: 'bandpass', f: 280, to: 750, q: 1.8, attack: 0.35 });
+    s.noise({ dur: dur * 0.85, gain: gain * 0.6, type: 'lowpass', f: 450, to: 180, q: 1.2, at: 0.15, attack: 0.25 });
+  },
+  crowdCheer: (s, o = {}) => {
+    const dur = o.dur || 2.4;
+    for (let i = 0; i < 8; i++) {
+      s.noise({ dur: dur * (0.65 + (i % 3) * 0.15), gain: 0.08, type: 'bandpass', f: 480 + i * 170, q: 2.4, at: i * 0.035, attack: 0.12 });
+    }
+    [0.35, 0.75, 1.25].forEach((at, idx) => {
+      s.tone({ f: 1650 + idx * 260, to: 2250 + idx * 180, dur: 0.32, type: 'sine', gain: 0.035, at, attack: 0.03 });
+    });
+  },
 
   // Medieval
   clank: (s) => { s.metal({ f: 430 + Math.random() * 80, dur: 0.45, gain: 0.25 }); s.noise({ dur: 0.08, gain: 0.3, f: 4000, q: 0.7 }); },
@@ -179,5 +194,85 @@ export const sfx = new Synth();
 export function haptic(pattern = 20) {
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch { /* unsupported */ }
 }
+
+/**
+ * Audio Manager integration providing high-level event-driven sound triggers
+ * and coordination for celebratory gameplay events (e.g. Hole-In-One, Ace celebrations).
+ */
+export class AudioManager {
+  constructor(synth = sfx) {
+    this.synth = synth;
+    this.listeners = new Set();
+    this._lastHoleInOne = 0;
+  }
+
+  unlock() {
+    this.synth.unlock();
+  }
+
+  play(name, opts = {}) {
+    return this.synth.play(name, opts);
+  }
+
+  setMuted(m) {
+    this.synth.setMuted(m);
+  }
+
+  get muted() {
+    return this.synth.muted;
+  }
+
+  /**
+   * Triggers specific celebratory sound effects (wind whoosh, ball rattle, crowd cheers, fanfare)
+   * specifically when a hole-in-one is recorded.
+   *
+   * @param {object} [opts] - Event metadata (player, hole, w, h)
+   */
+  onHoleInOne(opts = {}) {
+    const now = Date.now();
+    // Debounce rapid multiple triggers within 1.2s to preserve acoustic clarity
+    if (now - this._lastHoleInOne < 1200) return;
+    this._lastHoleInOne = now;
+
+    this.unlock();
+
+    // 1. Aerodynamic wind whoosh across the green / ball flight breeze
+    this.synth.play('wind', { dur: 1.8, gain: 0.28 });
+
+    // 2. Ball rattling into the bottom of the cup
+    this.synth.play('cupDrop');
+
+    // 3. Staggered, roaring stadium crowd cheer
+    setTimeout(() => {
+      this.synth.play('crowdCheer', { dur: 2.6 });
+      this.synth.play('crowd');
+    }, 180);
+
+    // 4. Celebratory victory fanfare
+    setTimeout(() => {
+      this.synth.play('fanfare');
+    }, 450);
+
+    // 5. Haptic celebration pulse
+    haptic([60, 40, 60, 40, 120]);
+
+    for (const listener of this.listeners) {
+      try { listener('hole-in-one', opts); } catch { /* ignore listener errors */ }
+    }
+  }
+
+  triggerHoleInOne(opts = {}) {
+    return this.onHoleInOne(opts);
+  }
+
+  on(fn) {
+    this.listeners.add(fn);
+    return () => this.listeners.delete(fn);
+  }
+}
+
+export const audioManager = new AudioManager(sfx);
+sfx.audioManager = audioManager;
+sfx.onHoleInOne = (opts) => audioManager.onHoleInOne(opts);
 
 export const SOUND_NAMES = Object.keys(SOUNDS);

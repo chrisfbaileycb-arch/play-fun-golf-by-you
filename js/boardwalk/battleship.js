@@ -1,4 +1,4 @@
-// Fairway Battleship — every golf shot is an artillery strike on a 10×10 grid stretched over the hole.
+// Fairway Fleet — every golf shot is an artillery strike on a 10×10 grid stretched over the hole.
 // Logic (init/onShot/onHoleComplete/hud/standings/isOver + grid maths) is pure & DOM-free.
 import { clamp, mulberry32, hashStr, el, clear, rrect, ease, seg, prefersReducedMotion } from '../core/util.js';
 import { synthesize } from '../core/fairway.js';
@@ -11,9 +11,9 @@ export const GRID = 10;
 export const COLS = 'ABCDEFGHIJ';
 export const FLEET = [
   { id: 'carrier', name: 'Carrier', len: 5 },
-  { id: 'battleship', name: 'Battleship', len: 4 },
-  { id: 'destroyer', name: 'Destroyer', len: 3 },
-  { id: 'patrol', name: 'Patrol Boat', len: 2 },
+  { id: 'flagship', name: 'Flagship', len: 4 },
+  { id: 'frigate', name: 'Frigate', len: 3 },
+  { id: 'scout', name: 'Scout', len: 2 },
 ];
 export const HULL = FLEET.reduce((s, f) => s + f.len, 0);
 
@@ -39,7 +39,7 @@ export function validFleet(ships) {
   if (!Array.isArray(ships) || ships.length !== FLEET.length) return false;
   const seen = new Set();
   for (const f of FLEET) {
-    const s = ships.find((x) => x.id === f.id);
+    const s = ships.find((x) => x.id === f.id || (f.id === 'flagship' && x.id === 'battleship') || (f.id === 'frigate' && x.id === 'destroyer') || (f.id === 'scout' && x.id === 'patrol'));
     if (!s || !Array.isArray(s.cells) || s.cells.length !== f.len) return false;
     for (const c of s.cells) {
       if (!Number.isInteger(c) || c < 0 || c >= GRID * GRID || seen.has(c)) return false;
@@ -181,11 +181,11 @@ function recordStrike(game, entry) {
 
 const battleship = {
   id: 'battleship',
-  name: 'Fairway Battleship',
-  tagline: 'Every shot is a shell. Sink their fleet.',
+  name: 'Fairway Fleet',
+  tagline: 'Naval artillery grid on the fairway: sink the rival fleet!',
   icon: '⚓',
   description:
-    'Before hole 1 each admiral secretly deploys a Carrier (5), Battleship (4), Destroyer (3) and Patrol Boat (2) on a 10×10 grid ' +
+    'Before hole 1 each admiral secretly deploys a Carrier (5), Flagship (4), Frigate (3) and Scout (2) on a 10×10 grid ' +
     '(columns A–J left→right, rows 1–10 green→tee) that is stretched over every hole. Each non-putt shot fires where it lands, against every ' +
     'opponent\'s fleet at once: Rough = 1 shell · Fairway = broadside (3 across) · Green circle = plus salvo (5) · Inner ring/bullseye or chip-in = 3×3 bracket. ' +
     'Sand = dud. Water/OB = misfire on YOUR OWN fleet at that cell. Holing out under par fires a guided missile at each rival (guaranteed hit); ' +
@@ -530,7 +530,7 @@ function renderPanel(container, game, api) {
   const last = ms.last;
   const ticker = el('p', { class: 'bw-ticker', 'aria-live': 'polite' },
     last ? `Last: ${nameOf(game, last.by)} · ${last.label} · ${last.cells.map(cellLabel).slice(0, 3).join(' ')}${last.cells.length > 3 ? '…' : ''} — ${last.hits.length ? `${last.hits.length} hit${last.hits.length > 1 ? 's' : ''}` : 'no hits'}` : 'Radar armed. Your first shot opens fire.');
-  container.append(el('section', { class: 'bw-panel bw-panel--battleship', 'aria-label': 'Battleship status' },
+  container.append(el('section', { class: 'bw-panel bw-panel--battleship', 'aria-label': 'Fairway Fleet status' },
     el('div', { class: 'bw-panel-head' }, el('h2', {}, 'War Room'), peekBtn),
     el('div', { class: 'bs-layout' }, mapHost, fleets), ticker));
 }

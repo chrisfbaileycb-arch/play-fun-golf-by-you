@@ -14,44 +14,79 @@ export const PAL = {
 
 // ---------------------------------------------------------------- tokens
 const TOKEN_PATHS = {
-  tophat: {
+  visor: {
     parts: [
-      { d: 'M3 18.6c0-1.5 4-2.6 9-2.6s9 1.1 9 2.6S17 21.2 12 21.2s-9-1.1-9-2.6z', tone: 'metal' },
-      { d: 'M7 17.2V6.6C7 5.2 9.2 4 12 4s5 1.2 5 2.6v10.6c-1.3.6-3 .9-5 .9s-3.7-.3-5-.9z', tone: 'metal' },
-      { d: 'M7 13.4c1.3.6 3 .9 5 .9s3.7-.3 5-.9v2.2c-1.3.6-3 .9-5 .9s-3.7-.3-5-.9z', tone: 'dark' },
+      { d: 'M2 16.5C4 13 8 10 12 10s8 3 10 6.5c-2.5 2.5-6 4-10 4s-7.5-1.5-10-4z', tone: 'metal' },
+      { d: 'M5 15.5c2-1.5 4.5-2.2 7-2.2s5 .7 7 2.2v1.8c-2.2.8-4.5 1.2-7 1.2s-4.8-.4-7-1.2z', tone: 'dark' },
+      { d: 'M4 14.5c2.2-2 5-3 8-3s5.8 1 8 3', tone: 'metal' },
     ],
   },
-  roadster: {
+  cart: {
     parts: [
-      { d: 'M2 15.6V13c0-.8.6-1.4 1.4-1.5L7 11l2.6-3.2c.4-.5 1-.8 1.6-.8H14c.6 0 1.1.3 1.4.7L17.6 11l2.9.4c.9.1 1.5.9 1.5 1.8v2.4c0 .5-.4 1-1 1H3c-.6 0-1-.5-1-1z', tone: 'metal' },
-      { d: 'M10.1 10.8l1.6-2.4h2.2l1.4 2.4z', tone: 'dark' },
-      { d: 'M4.2 16.6a2.3 2.3 0 1 0 4.6 0a2.3 2.3 0 1 0-4.6 0zM15.2 16.6a2.3 2.3 0 1 0 4.6 0a2.3 2.3 0 1 0-4.6 0z', tone: 'dark' },
+      { d: 'M4 7h14v2H4zM5 9v4M17 9v4M3 13h16l2 3v3H2v-3z', tone: 'metal' },
+      { d: 'M5 18a2 2 0 1 0 4 0a2 2 0 1 0-4 0zM13 18a2 2 0 1 0 4 0a2 2 0 1 0-4 0z', tone: 'dark' },
+      { d: 'M1 12l2 4h2l-2-4zM10 12l2-2h2', tone: 'dark' },
     ],
   },
-  scottie: {
+  gopher: {
     parts: [
-      { d: 'M2.4 10.6 4 8.4 5 4.8l1.7 3.1 1.4.7h9.4l1.1-.1 1.4-3.5.8.7-.2 4.1.1 8.4h-2.5l-.5-3.6H9.9l-.5 3.6H6.9l-.4-4.4-1.9-.9L3 12.2z', tone: 'metal' },
-      { d: 'M4.4 9.6a.7.7 0 1 0 1.4 0a.7.7 0 1 0-1.4 0z', tone: 'dark' },
+      { d: 'M7 8a2 2 0 1 1 2-2M13 6a2 2 0 1 1 2 2M6 10c0-2.8 2.5-5 5.5-5s5.5 2.2 5.5 5c0 1.6-.8 3-2 3.8 1.2 1.2 2 2.8 2 5.2H5c0-2.4.8-4 2-5.2C5.8 13 6 11.6 6 10z', tone: 'metal' },
+      { d: 'M9.5 13a2 2 0 1 0 4 0a2 2 0 1 0-4 0z', tone: 'dark' },
+      { d: 'M10.5 9h2v1.5h-2z', tone: 'dark' },
     ],
   },
-  thimble: {
+  beercan: {
     parts: [
-      { d: 'M7 19.4 8 6.8C8.1 5.2 9.8 4 12 4s3.9 1.2 4 2.8l1 12.6c0 .9-2.2 1.5-5 1.5s-5-.6-5-1.5z', tone: 'metal' },
-      { d: 'M6.6 19.2c0-1 2.4-1.7 5.4-1.7s5.4.7 5.4 1.7v1.2c0 1-2.4 1.7-5.4 1.7s-5.4-.7-5.4-1.7z', tone: 'dark' },
-      { d: 'M10 8.4a.6.6 0 1 0 1.2 0a.6.6 0 1 0-1.2 0zM12.8 8.4a.6.6 0 1 0 1.2 0a.6.6 0 1 0-1.2 0zM9.6 11.4a.6.6 0 1 0 1.2 0a.6.6 0 1 0-1.2 0zM11.4 11.4a.6.6 0 1 0 1.2 0a.6.6 0 1 0-1.2 0zM13.2 11.4a.6.6 0 1 0 1.2 0a.6.6 0 1 0-1.2 0zM9.3 14.4a.6.6 0 1 0 1.2 0a.6.6 0 1 0-1.2 0zM11.4 14.4a.6.6 0 1 0 1.2 0a.6.6 0 1 0-1.2 0zM13.5 14.4a.6.6 0 1 0 1.2 0a.6.6 0 1 0-1.2 0z', tone: 'dark' },
+      { d: 'M6 6.5c0-1.2 2.7-2 6-2s6 .8 6 2v11c0 1.2-2.7 2-6 2s-6-.8-6-2z', tone: 'metal' },
+      { d: 'M6 6.5c0 1.2 2.7 2 6 2s6-.8 6-2M7 11h10v4H7z', tone: 'dark' },
+      { d: 'M10.5 4.8h3v1.8h-3z', tone: 'dark' },
+    ],
+  },
+  mashie: {
+    parts: [
+      { d: 'M15 3l-4 13-1.5-.4 4-13z', tone: 'dark' },
+      { d: 'M10.5 15.5l-6.5 1.8c-.8.2-1.2.9-1 1.6l.4 1c.2.6.8.9 1.5.7l8.5-2.4c.7-.2 1.1-.9.9-1.6l-.4-1c-.2-.6-.8-.9-1.5-.7l-1.9.6z', tone: 'metal' },
+      { d: 'M4.5 18.5l4.5-1.2M5 19.5l4.5-1.2', tone: 'dark' },
+    ],
+  },
+  divot: {
+    parts: [
+      { d: 'M8 4c0-.6 1.8-1 4-1s4 .4 4 1v7c0 1-1.8 2-4 2s-4-1-4-2z', tone: 'metal' },
+      { d: 'M10 7a2 2 0 1 0 4 0a2 2 0 1 0-4 0z', tone: 'dark' },
+      { d: 'M9 13v7l1.5-1.2v-5.8M13.5 13v5.8l1.5 1.2v-7', tone: 'metal' },
     ],
   },
 };
 
+// Aliases for backwards compatibility with any saved games
+TOKEN_PATHS.tophat = TOKEN_PATHS.visor;
+TOKEN_PATHS.roadster = TOKEN_PATHS.cart;
+TOKEN_PATHS.scottie = TOKEN_PATHS.gopher;
+TOKEN_PATHS.thimble = TOKEN_PATHS.beercan;
+
+const OLD_TOKEN_MAP = {
+  tophat: 'visor',
+  roadster: 'cart',
+  scottie: 'gopher',
+  thimble: 'beercan',
+};
+
 export const TOKENS = [
-  { value: 'tophat', label: 'Top Hat' },
-  { value: 'roadster', label: 'Roadster' },
-  { value: 'scottie', label: 'Scottie' },
-  { value: 'thimble', label: 'Thimble' },
+  { value: 'visor', label: 'The Visor', icon: '🧢' },
+  { value: 'cart', label: 'The Golf Cart', icon: '🛺' },
+  { value: 'gopher', label: 'The Gopher', icon: '🐹' },
+  { value: 'beercan', label: 'The Beer Can', icon: '🍺' },
+  { value: 'mashie', label: 'The Vintage Mashie', icon: '🏌️' },
+  { value: 'divot', label: 'The Divot Tool', icon: '🍴' },
 ];
 export const TOKEN_KINDS = TOKENS.map((t) => t.value);
 export const tokenLabel = (kind) => (TOKENS.find((t) => t.value === kind) || TOKENS[0]).label;
-export const tokenOf = (player, i = 0) => (TOKEN_KINDS.includes(player?.token) ? player.token : TOKEN_KINDS[i % 4]);
+export const tokenOf = (player, i = 0) => {
+  const t = player?.token;
+  if (TOKEN_KINDS.includes(t)) return t;
+  if (OLD_TOKEN_MAP[t]) return OLD_TOKEN_MAP[t];
+  return TOKEN_KINDS[i % TOKEN_KINDS.length];
+};
 
 /** Fresh SVG node for a token (DOM). `color` paints the base disc. */
 export function tokenSVG(kind, color = PAL.red, size = 28, { label = null } = {}) {

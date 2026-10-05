@@ -3,7 +3,9 @@ import knight from './js/knight/index.js';
 import boardwalk from './js/boardwalk/index.js';
 import { el, $, clear, sleep, fitCanvas, uid } from './js/core/util.js';
 import { sfx, haptic } from './js/core/audio.js';
-import { runScene } from './js/core/fx.js';
+import { runScene, triggerScoreCelebration } from './js/core/fx.js';
+import { renderHUD as renderHUDComponent } from './js/core/hud.js';
+import { recordRoundAces, renderCareerStatsSummary } from './js/core/careerStats.js';
 import { Radar } from './js/core/radar.js';
 import { gps } from './js/core/gps.js';
 import { showView, playEvents, toast, dialog, segmented, announce } from './js/core/ui.js';
@@ -17,6 +19,7 @@ import {
   shotsOf, holeStrokes, validateGame, playerById, simulateFor, PLAYER_COLORS,
 } from './js/core/game.js';
 import { holeResults, allRoundStats } from './js/core/stats.js';
+import { isHoleInOne, createCelebrationScene, augmentSceneWithFestiveFX } from './js/core/celebration.js';
 
 const SUITES = { knight, boardwalk };
 const ZONE_NAMES = { cup: 'Holed', bullseye: 'Bullseye', inner: 'Inner ring', green: 'Green', fairway: 'Fairway', roughL: 'Left rough', roughR: 'Right rough', sand: 'Sand', water: 'Water', ob: 'Out of bounds' };
@@ -531,21 +534,11 @@ function renderAll() {
 function renderHUD() {
   const g = S.game;
   const mode = modeOf();
-  const host = clear($('#hud'));
-  let rows = [];
-  try { rows = mode.hud(g) || []; } catch (err) { console.error(err); }
-  for (const p of g.players) {
-    const r = rows.find((x) => x.pid === p.id) || { value: String(sumStrokes(p.id)), label: 'strokes' };
-    const card = el('div', { class: `hud-card ${S.sel.pid === p.id ? 'is-turn' : ''}` },
-      r.badge ? el('span', { class: 'hc-badge' }, r.badge) : null,
-      el('div', { class: 'hc-name' }, avatarFor(p, 22) || (p.cpu ? '🤖 ' : ''), el('span', {}, p.name)),
-      el('div', { class: 'hc-val' }, r.value),
-      el('div', { class: 'hc-label' }, r.label || ''),
-      r.bar ? el('div', { class: 'hc-bar', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': r.bar.max, 'aria-valuenow': Math.round(r.bar.value), 'aria-label': `${p.name} ${r.label || ''}` },
-        el('i', { style: { transform: `scaleX(${Math.max(0, Math.min(1, r.bar.value / (r.bar.max || 1)))})`, background: r.bar.color || p.color } })) : null);
-    card.style.setProperty('--pc', p.color);
-    host.appendChild(card);
-  }
+  renderHUDComponent($('#hud'), g, mode, {
+    selectedPid: S.sel.pid,
+    avatarFor,
+    sumStrokes,
+  });
 }
 
 function sumStrokes(pid) {
@@ -676,7 +669,35 @@ async function recordShot(pid, inputOrPromise) {
   renderAll();
   await playEvents(events, { shakeTarget: $('.radar-wrap') });
 
-  if (mode.shotScene) {
+  const isAce = isHoleInOne(shot);
+  const curStrokes = holeStrokes(g, pid, g.holeIdx);
+  const finishedUnderPar = (shot.holed || isPlayerDone(g, pid)) && curStrokes < currentHole(g).par;
+
+  if (isAce || (curStrokes === 1 && (shot.holed || isPlayerDone(g, pid)))) {
+    triggerScoreCelebration(1, $('#scene-canvas'));
+    const aceScene = createCelebrationScene({
+      player,
+      hole: currentHole(g),
+      holeIdx: g.holeIdx,
+      strokes: 1,
+      par: currentHole(g).par,
+      isAce: true,
+      suiteTheme: g.suite,
+    });
+    g.holes[g.holeIdx]._celebrated = true;
+    await playScene(aceScene, mode, !isHoleDone(g));
+  } else if (!isHoleDone(g) && finishedUnderPar) {
+    const underParScene = createCelebrationScene({
+      player,
+      hole: currentHole(g),
+      holeIdx: g.holeIdx,
+      strokes: curStrokes,
+      par: currentHole(g).par,
+      isAce: false,
+      suiteTheme: g.suite,
+    });
+    await playScene(underParScene, mode, true);
+  } else if (mode.shotScene) {
     let scene = null;
     try { scene = mode.shotScene(g, ctx); } catch (err) { console.error(err); }
     if (scene) await playScene(scene, mode, true);
@@ -770,6 +791,46 @@ async function finishHole() {
   await playEvents(events, { shakeTarget: $('#app') });
   let scene = null;
   try { scene = mode.scene ? mode.scene(g, ctx) : null; } catch (err) { console.error('scene error', err); }
+
+  const results = holeResults(g, g.holeIdx);
+  const underParPlayers = g.players
+    .filter((p) => {
+      const r = results[p.id];
+      return r && r.finished && !r.pickup && r.toPar < 0;
+    })
+    .map((p) => ({ ...p, toPar: results[p.id].toPar, strokes: results[p.id].strokes }));
+
+  const anyAce = g.players.some((p) => results[p.id]?.strokes === 1 && results[p.id]?.holed);
+  if (anyAce) {
+    triggerScoreCelebration(1, $('#scene-canvas'));
+  }
+
+  if (scene) {
+    if (underParPlayers.length > 0 || anyAce) {
+      scene = augmentSceneWithFestiveFX(scene, {
+        underParPlayers,
+        isAce: anyAce,
+        hole: currentHole(g),
+        holeIdx: g.holeIdx,
+      });
+    }
+  } else if (underParPlayers.length > 0 || anyAce) {
+    if (!(g.holes[g.holeIdx]._celebrated && g.players.length === 1)) {
+      underParPlayers.sort((a, b) => a.toPar - b.toPar);
+      const star = underParPlayers[0] || g.players[0];
+      scene = createCelebrationScene({
+        player: star,
+        hole: currentHole(g),
+        holeIdx: g.holeIdx,
+        strokes: star.strokes || 1,
+        par: currentHole(g).par,
+        isAce: anyAce,
+        suiteTheme: g.suite,
+        extraPlayers: underParPlayers.slice(1),
+      });
+    }
+  }
+
   if (scene) await playScene(scene, mode, false);
   advanceHole();
 }
@@ -839,6 +900,14 @@ function showSummary() {
     console.error('summary error', err);
     host.append(el('h2', {}, 'Final standings'), el('ol', {}, ...standings.map((s) => el('li', {}, `${playerById(g, s.pid)?.name}: ${s.display}`))),
       el('div', { class: 'row gap' }, el('button', { class: 'btn btn-primary', type: 'button', onclick: api.restart }, 'Play again'), el('button', { class: 'btn btn-ghost', type: 'button', onclick: api.home }, 'Home')));
+  }
+
+  // Record round aces and display Career Stats summary table in post-game view
+  try {
+    recordRoundAces(g);
+    renderCareerStatsSummary(host, g, { avatarFor });
+  } catch (err) {
+    console.error('career stats summary error', err);
   }
 }
 

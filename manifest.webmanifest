@@ -1,7 +1,7 @@
 {
   "name": "Arcade Links — Knight Golf & Boardwalk Links",
   "short_name": "Arcade Links",
-  "description": "Turn any real golf course into an arcade: Topgolf-style target rings, knight duels and retro board games.",
+  "description": "Turn any real golf course into an arcade: interactive target rings, knight duels and retro board games.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

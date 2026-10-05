@@ -1,5 +1,6 @@
 // Canvas FX (particles, floating text, camera shake) and a reusable full-screen scene runner.
 import { fitCanvas, prefersReducedMotion, clamp, ease } from './util.js';
+import { audioManager, sfx } from './audio.js';
 
 export class FX {
   constructor() {
@@ -33,6 +34,67 @@ export class FX {
       const v = 200 + Math.random() * 360;
       this.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1.8 + Math.random(), max: 2.5, size: 4 + Math.random() * 4, color: colors[i % colors.length], gravity: 420, glow: false, kind: 'confetti', rot: Math.random() * 6, vr: (Math.random() - 0.5) * 12 });
     }
+  }
+
+  /**
+   * High-energy celebratory confetti blast specifically designed for Ace / Hole-In-One celebrations.
+   */
+  celebratoryConfetti(x, y, {
+    n = 70,
+    colors = ['#ffd700', '#f4b62b', '#e8443a', '#2f7de1', '#33b36b', '#9b59b6', '#ffffff'],
+    power = 480,
+    spread = 2.0,
+  } = {}) {
+    const count = prefersReducedMotion() ? Math.ceil(n / 3) : n;
+    for (let i = 0; i < count; i++) {
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * spread;
+      const v = power * (0.35 + Math.random() * 0.85);
+      this.parts.push({
+        x,
+        y,
+        vx: Math.cos(a) * v,
+        vy: Math.sin(a) * v,
+        life: 2.2 + Math.random() * 1.2,
+        max: 3.5,
+        size: 5 + Math.random() * 6,
+        color: colors[i % colors.length],
+        gravity: 380,
+        glow: false,
+        kind: 'confetti',
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 14,
+      });
+    }
+  }
+
+  /**
+   * Fires a festive sequence (cannons + banner text + flash + audio effects) specifically when score is 1.
+   */
+  celebrateScore(score, { w = 400, h = 300, x = null, y = null, triggerAudio = true } = {}) {
+    const numericScore = typeof score === 'object' && score !== null ? (score.strokes ?? score.score) : Number(score);
+    if (numericScore !== 1) return false;
+
+    // Trigger audio manager hole-in-one sound effects (wind whoosh, crowd cheers, fanfare)
+    if (triggerAudio !== false) {
+      audioManager.onHoleInOne({ score: 1, w, h });
+    }
+
+    this.flash('#ffd700', 0.6);
+    this.shake(12, 0.4);
+    const cx = x ?? w / 2;
+    const cy = y ?? h * 0.85;
+    const leftX = w * 0.15;
+    const rightX = w * 0.85;
+    this.celebratoryConfetti(leftX, cy, { n: 45, spread: 1.2 });
+    this.celebratoryConfetti(rightX, cy, { n: 45, spread: 1.2 });
+    this.celebratoryConfetti(cx, cy * 0.7, { n: 60, spread: 2.4 });
+    this.text(cx, h * 0.35, 'HOLE IN ONE! ⛳', {
+      color: '#ffd700',
+      size: Math.max(24, Math.round(w * 0.07)),
+      stroke: '#051108',
+      life: 2.5,
+    });
+    return true;
   }
 
   text(x, y, str, { color = '#fff', size = 28, life = 1.2, vy = -60, stroke = '#000', font = 'system-ui' } = {}) {
@@ -142,23 +204,62 @@ export function runScene(canvas, scene, { skipButton = null, speed = 1 } = {}) {
     let last = performance.now();
     let raf = 0;
     let finished = false;
+
+    if (canvas) {
+      canvas._activeFX = fx;
+    }
+
     const finish = () => {
       if (finished) return;
       finished = true;
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       if (skipButton) skipButton.removeEventListener('click', onSkip);
+      if (canvas && canvas._activeFX === fx) {
+        delete canvas._activeFX;
+        delete canvas._activeFXW;
+        delete canvas._activeFXH;
+      }
       resolve(scene.result);
     };
+
     const onSkip = () => {
       if (scene.onSkip) scene.onSkip(api);
       finish();
     };
-    const onResize = () => { const f = fitCanvas(canvas); api.w = f.w; api.h = f.h; };
+
+    const onResize = () => {
+      const f = fitCanvas(canvas);
+      api.w = f.w;
+      api.h = f.h;
+      if (canvas) {
+        canvas._activeFXW = f.w;
+        canvas._activeFXH = f.h;
+      }
+    };
     onResize();
     window.addEventListener('resize', onResize);
     if (skipButton) skipButton.addEventListener('click', onSkip);
+
+    // Detect if this scene represents a Hole-in-One / score of 1
+    const isScoreOfOne = Boolean(
+      scene && (
+        scene.score === 1 ||
+        scene.strokes === 1 ||
+        scene.isAce === true ||
+        (scene.result && (scene.result.score === 1 || scene.result.strokes === 1)) ||
+        (typeof scene.title === 'string' && /hole[- ]in[- ]one/i.test(scene.title))
+      )
+    );
+
     if (scene.init) scene.init(api);
+
+    // Trigger celebratory confetti on the canvas specifically when score is 1
+    let aceBurst2 = false;
+    if (isScoreOfOne) {
+      fx.celebrateScore(1, { w: api.w, h: api.h });
+    }
+
     let doneAt = null;
     const frame = (now) => {
       if (finished) return;
@@ -169,6 +270,12 @@ export function runScene(canvas, scene, { skipButton = null, speed = 1 } = {}) {
       const { dpr } = fitCanvas(canvas);
       scene.update(dt, api);
       fx.update(dt);
+
+      if (isScoreOfOne && !aceBurst2 && api.t >= 1.0) {
+        aceBurst2 = true;
+        fx.celebratoryConfetti(api.w * 0.5, api.h * 0.4, { n: 40, spread: 2.2 });
+      }
+
       const o = fx.offset();
       ctx.setTransform(dpr, 0, 0, dpr, o.x * dpr, o.y * dpr);
       ctx.clearRect(-60, -60, api.w + 120, api.h + 120);
@@ -181,6 +288,98 @@ export function runScene(canvas, scene, { skipButton = null, speed = 1 } = {}) {
     raf = requestAnimationFrame(frame);
   });
 }
+
+/**
+ * Triggers a celebratory confetti particle effect on the scene-canvas specifically
+ * when the score engine detects a score of 1 on any hole.
+ *
+ * @param {number|object} score - The score from the score engine (or hole result with strokes: 1)
+ * @param {HTMLCanvasElement|string} [canvas] - Target canvas element or selector (defaults to #scene-canvas)
+ * @param {object} [options] - Additional options (particle count, colors, etc.)
+ * @returns {boolean} True if the effect was triggered (score === 1), false otherwise
+ */
+export function triggerScoreCelebration(score, canvas = null, options = {}) {
+  const numericScore = typeof score === 'object' && score !== null ? (score.strokes ?? score.score) : Number(score);
+  if (numericScore !== 1) {
+    return false;
+  }
+
+  // Trigger audio manager hole-in-one sound effects (crowd cheers, wind, etc.)
+  if (options.triggerAudio !== false) {
+    audioManager.onHoleInOne({ score: 1 });
+  }
+
+  const targetCanvas = typeof canvas === 'string'
+    ? (typeof document !== 'undefined' && document.querySelector ? document.querySelector(canvas) : null)
+    : (canvas || (typeof document !== 'undefined' ? (document.getElementById?.('scene-canvas') || (document.querySelector ? document.querySelector('.scene-canvas') : null)) : null));
+
+  return triggerCelebratoryConfetti(targetCanvas, { ...options, triggerAudio: false });
+}
+
+/**
+ * Triggers a celebratory confetti particle effect on the given or default #scene-canvas.
+ *
+ * @param {HTMLCanvasElement|string} [canvas] - Target canvas (defaults to #scene-canvas)
+ * @param {object} [options] - Confetti options
+ * @returns {boolean}
+ */
+export function triggerCelebratoryConfetti(canvas = null, options = {}) {
+  const targetCanvas = typeof canvas === 'string'
+    ? (typeof document !== 'undefined' && document.querySelector ? document.querySelector(canvas) : null)
+    : (canvas || (typeof document !== 'undefined' ? (document.getElementById?.('scene-canvas') || (document.querySelector ? document.querySelector('.scene-canvas') : null)) : null));
+
+  if (!targetCanvas) {
+    return true; // Headless / simulated environment
+  }
+
+  if (targetCanvas._activeFX) {
+    const w = targetCanvas._activeFXW || targetCanvas.width || 400;
+    const h = targetCanvas._activeFXH || targetCanvas.height || 300;
+    targetCanvas._activeFX.celebrateScore(1, { w, h, ...options });
+    return true;
+  }
+
+  const fx = new FX();
+  const { dpr, w, h } = fitCanvas(targetCanvas);
+  targetCanvas._activeFX = fx;
+  targetCanvas._activeFXW = w;
+  targetCanvas._activeFXH = h;
+  fx.celebrateScore(1, { w, h, ...options });
+
+  if (typeof requestAnimationFrame === 'undefined') {
+    delete targetCanvas._activeFX;
+    return true;
+  }
+
+  let last = performance.now();
+  let raf = 0;
+  const loop = (now) => {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    fx.update(dt);
+    const ctx = targetCanvas.getContext?.('2d');
+    if (ctx) {
+      const o = fx.offset();
+      ctx.save();
+      ctx.setTransform(dpr, 0, 0, dpr, o.x * dpr, o.y * dpr);
+      fx.draw(ctx, w, h);
+      ctx.restore();
+    }
+    if (fx.parts.length > 0 || fx.texts.length > 0 || fx.flashA > 0 || fx.shakeT > 0) {
+      raf = requestAnimationFrame(loop);
+    } else {
+      cancelAnimationFrame(raf);
+      delete targetCanvas._activeFX;
+      delete targetCanvas._activeFXW;
+      delete targetCanvas._activeFXH;
+    }
+  };
+  raf = requestAnimationFrame(loop);
+  return true;
+}
+
+export const celebrateHoleInOne = (canvas, options) => triggerScoreCelebration(1, canvas, options);
+export const checkScoreAndCelebrate = (score, canvas, options) => triggerScoreCelebration(score, canvas, options);
 
 /** Simple timeline helper for scripted scenes: list of {at, fn} fired once as time passes. */
 export class Timeline {

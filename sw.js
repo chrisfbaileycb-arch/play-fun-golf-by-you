@@ -1,12 +1,13 @@
 // Offline-first service worker: precache the app shell, then cache-first with background refresh.
-const VERSION = 'arcade-links-v1';
+const VERSION = 'arcade-links-v2';
 const SHELL = [
   './', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest',
   'css/knight.css', 'css/boardwalk.css',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
   'js/core/util.js', 'js/core/fairway.js', 'js/core/course.js', 'js/core/shots.js', 'js/core/game.js',
   'js/core/stats.js', 'js/core/audio.js', 'js/core/fx.js', 'js/core/radar.js', 'js/core/gps.js',
-  'js/core/ui.js', 'js/core/store.js', 'js/core/courseEditor.js',
+  'js/core/ui.js', 'js/core/store.js', 'js/core/courseEditor.js', 'js/core/celebration.js', 'js/core/hud.js',
+  'js/core/careerStats.js',
   'js/knight/index.js', 'js/boardwalk/index.js',
 ];
 

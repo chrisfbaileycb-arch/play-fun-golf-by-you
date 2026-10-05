@@ -1,21 +1,21 @@
-// Mode F: Rock 'Em Sock 'Em Robots Duel
+// Mode F: Knockout Brawler
 import { el, clear, clamp, ease } from '../core/util.js';
 import { sfx } from '../core/audio.js';
 import { Timeline } from '../core/fx.js';
 
 export const ROBOT_CONFIG = [
-  { name: 'Red Rocker', color: '#e74c3c', accent: '#ff7675', visor: '#ffeaa7' },
-  { name: 'Blue Bomber', color: '#2980b9', accent: '#74b9ff', visor: '#81ecec' },
-  { name: 'Gold Crusher', color: '#f39c12', accent: '#f1c40f', visor: '#ffffff' },
-  { name: 'Green Basher', color: '#27ae60', accent: '#2ecc71', visor: '#ffeaa7' },
+  { name: 'Red Wedge', color: '#e74c3c', accent: '#ff7675', visor: '#ffeaa7' },
+  { name: 'Blue Putter', color: '#2980b9', accent: '#74b9ff', visor: '#81ecec' },
+  { name: 'Gold Driver', color: '#f39c12', accent: '#f1c40f', visor: '#ffffff' },
+  { name: 'Green Iron', color: '#27ae60', accent: '#2ecc71', visor: '#ffeaa7' },
 ];
 
 export const robots = {
   id: 'robots',
-  name: "Rock 'Em Sock 'Em Duel",
-  tagline: 'Charge robotic punches on the fairway — deliver the chin blow to POP the head!',
-  icon: '🤖',
-  description: 'Golf shots charge your robotic punch meter. Pure strikes land thunderous crosses and hooks. Reduce your rival’s Chin HP to zero to trigger the iconic spring-loaded head pop!',
+  name: 'Knockout Brawler',
+  tagline: "Robotic fairway brawl: charge punches and POP your rival's head!",
+  icon: '🥊',
+  description: 'Red Wedge vs. Blue Putter! Golf shots charge your robotic punch meter. Pure strikes land thunderous crosses and hooks. Reduce your rival’s Chin HP to zero to trigger the iconic spring-loaded head pop!',
   minPlayers: 1,
   maxPlayers: 4,
   needsRival: true,
@@ -44,7 +44,7 @@ export const robots = {
     if (count === 1) {
       rivalId = 'cpu_bomber';
       players[rivalId] = {
-        name: 'Blue Bomber (CPU)',
+        name: 'Blue Putter (CPU)',
         color: '#2980b9',
         accent: '#74b9ff',
         visor: '#81ecec',
@@ -233,7 +233,7 @@ export const robots = {
   },
 };
 
-/** Draw the classic yellow tabletop boxing ring with Red Rocker and Blue Bomber */
+/** Draw the classic yellow tabletop boxing ring with Red Wedge and Blue Putter */
 export function drawRingAndRobots(ctx, w, h, p1, p2, duel) {
   ctx.clearRect(0, 0, w, h);
 

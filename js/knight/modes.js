@@ -4,11 +4,11 @@ import { resolveDuel, resolveRaidBoss } from './combat.js';
 import { createArenaScene } from './arena.js';
 import { el, clear } from '../core/util.js';
 
-/** Mode 1: Castle Conquest (Topgolf style points & zone battle) */
+/** Mode 1: Castle Conquest (Arcade target points & zone battle) */
 export const castleConquest = {
   id: 'castle',
   name: 'Castle Conquest',
-  tagline: 'Topgolf arcade zone battle with knight duels',
+  tagline: 'Arcade Target Play zone battle with knight duels',
   icon: '🏰',
   description: 'Target zones yield positive points, multipliers, and attack power. After every hole, the best accuracy triggers a Critical Strike in the duel arena!',
   minPlayers: 1,

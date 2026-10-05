@@ -1,7 +1,7 @@
 // Test entry: each suite owns its own test file (core / knight / boardwalk-a / boardwalk-b).
 import { run } from './harness.js';
 
-const files = ['./core.test.js', './knight.test.js', './boardwalk.test.js', './boardwalk2.test.js'];
+const files = ['./core.test.js', './knight.test.js', './boardwalk.test.js', './boardwalk2.test.js', './celebration.test.js'];
 const out = document.getElementById('out');
 for (const f of files) {
   try {

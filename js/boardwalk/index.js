@@ -28,11 +28,11 @@ export default {
   playerFields: [
     {
       key: 'token',
-      label: 'Board Game Token',
+      label: 'Arcade Token',
       options: TOKENS.map((t) => ({
         value: t.value,
         label: t.label,
-        icon: t.value === 'tophat' ? '🎩' : t.value === 'roadster' ? '🚗' : t.value === 'scottie' ? '🐕' : '🧵',
+        icon: t.icon,
       })),
     },
   ],
@@ -54,7 +54,7 @@ export default {
   ],
 
   avatar(player, size = 28) {
-    const kind = player?.token || 'tophat';
+    const kind = player?.token || 'visor';
     const color = player?.color || '#d7263d';
     return tokenSVG(kind, color, size, { label: player?.name || 'Pawn' });
   },
@@ -65,6 +65,6 @@ export default {
 
   scanScorecard: scanScorecardDialog,
 
-  cpuNames: ['Mr. Boardwalk', 'Admiral Cannon', 'Speedy Scottie', 'Red Rocker'],
-  cpuDefaults: { token: 'roadster' },
+  cpuNames: ['Judge Smails', 'Al Czervik', 'Ty Webb', 'Carl Spackler'],
+  cpuDefaults: { token: 'cart' },
 };

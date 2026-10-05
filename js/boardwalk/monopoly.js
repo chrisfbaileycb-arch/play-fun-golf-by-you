@@ -1,4 +1,4 @@
-// Turf Monopoly — fairway segments and greens are deeded properties. Land, buy, collect rent, go to jail.
+// Turf Tycoon — fairway segments and greens are deeded properties. Land, buy, collect rent, go to penalty box.
 // Logic is pure & DOM-free; panel()/overlay()/scene() render.
 import { el, clear, mulberry32, hashStr, rrect, ease, seg, prefersReducedMotion, formatNum } from '../core/util.js';
 import { synthesize, projectToPath, pointAtS, normalAtS } from '../core/fairway.js';
@@ -16,7 +16,7 @@ export const GROUPS = [
   { name: 'Arcade', color: '#f5d90a' },
   { name: 'Pier', color: '#1fa55a' },
   { name: 'Marina', color: '#1560bd' },
-  { name: 'Promenade', color: '#7a3fa0' },
+  { name: 'Emerald 18', color: '#7a3fa0' },
 ];
 const SUFFIX = ['Lane', 'Avenue', 'Row'];
 const TAX = { sand: 50, ob: 100 };
@@ -72,10 +72,10 @@ export const CHANCE = [
   { id: 'c3', text: 'Speeding golf-cart ticket. Pay $50 to Free Parking.', fx: 'pay', n: 50 },
   { id: 'c4', text: 'Elected Club Captain. Pay each player $50.', fx: 'payEach', n: 50 },
   { id: 'c5', text: 'Sponsorship deal! Collect $50 from every player.', fx: 'collectEach', n: 50 },
-  { id: 'c6', text: 'Get Out of Jail Free. Keep this card until needed.', fx: 'goojf' },
+  { id: 'c6', text: 'Penalty Relief Waiver. Keep this card until needed.', fx: 'goojf' },
   { id: 'c7', text: 'Groundskeeper repairs: pay $25 per deed you own.', fx: 'perDeed', n: -25 },
   { id: 'c8', text: 'Free deed! Take the cheapest unowned deed on this hole.', fx: 'freeDeed' },
-  { id: 'c9', text: 'Go directly to Jail. Your next shot earns nothing.', fx: 'jail' },
+  { id: 'c9', text: 'Go directly to Penalty Box. Your next shot earns nothing.', fx: 'jail' },
   { id: 'c10', text: 'Your ball dents the snack shack. Pay $15.', fx: 'pay', n: 15 },
 ];
 export const CHEST = [
@@ -85,7 +85,7 @@ export const CHEST = [
   { id: 'k4', text: 'Lost-ball fund matures. Collect $100.', fx: 'collect', n: 100 },
   { id: 'k5', text: 'Ball-retriever rental. Pay $20.', fx: 'pay', n: 20 },
   { id: 'k6', text: 'It\'s your birthday on the course! Collect $10 from every player.', fx: 'collectEach', n: 10 },
-  { id: 'k7', text: 'Get Out of Jail Free. Keep this card until needed.', fx: 'goojf' },
+  { id: 'k7', text: 'Penalty Relief Waiver. Keep this card until needed.', fx: 'goojf' },
   { id: 'k8', text: 'Member-guest winnings. Collect $75.', fx: 'collect', n: 75 },
   { id: 'k9', text: 'Pro-shop impulse buy. Pay $40.', fx: 'pay', n: 40 },
   { id: 'k10', text: 'Charity scramble. Pay $15 to Free Parking.', fx: 'pay', n: 15 },
@@ -181,12 +181,12 @@ function goToJail(game, pid, ev, why) {
   const ms = game.modeState;
   if (ms.goojf[pid] > 0) {
     ms.goojf[pid]--;
-    ev.push({ t: 'sfx', name: 'chance' }, { t: 'toast', text: `${nameOf(game, pid)} plays a Get Out of Jail Free card! (${why})` });
+    ev.push({ t: 'sfx', name: 'chance' }, { t: 'toast', text: `${nameOf(game, pid)} plays a Penalty Relief Waiver! (${why})` });
     return;
   }
   ms.jail[pid] = true;
   ms.ledger[pid].jailed++;
-  ev.push({ t: 'sfx', name: 'jail' }, { t: 'shake', mag: 8 }, { t: 'banner', text: 'GO TO JAIL!', sub: `${why} — ${nameOf(game, pid)}'s next shot earns nothing`, color: '#ffb01f' });
+  ev.push({ t: 'sfx', name: 'jail' }, { t: 'shake', mag: 8 }, { t: 'banner', text: 'PENALTY BOX!', sub: `${why} — ${nameOf(game, pid)}'s next shot earns nothing`, color: '#ffb01f' });
 }
 
 function drawCard(game, deck) {
@@ -204,7 +204,7 @@ function applyCard(game, pid, card, deck, holeIdx, ev) {
   const name = nameOf(game, pid);
   const others = game.players.filter((p) => p.id !== pid && !isBankrupt(game, p.id));
   ms.ledger[pid].cards++;
-  ev.push({ t: 'sfx', name: 'chance' }, { t: 'banner', text: deck === 'chance' ? 'CHANCE' : 'COMMUNITY CHEST', sub: card.text, color: deck === 'chance' ? '#ff9a1f' : '#33d6ff' });
+  ev.push({ t: 'sfx', name: 'chance' }, { t: 'banner', text: deck === 'chance' ? 'LOCKER ROOM DRAW' : 'CLUBHOUSE VAULT', sub: card.text, color: deck === 'chance' ? '#ff9a1f' : '#33d6ff' });
   ms.lastCard = { deck, text: card.text, pid };
   switch (card.fx) {
     case 'collect': ms.cash[pid] += card.n; ev.push({ t: 'sfx', name: 'coin' }); break;
@@ -224,10 +224,10 @@ function applyCard(game, pid, card, deck, holeIdx, ev) {
       else { ms.cash[pid] += 100; ev.push({ t: 'toast', text: 'Every deed here is owned — collect $100 instead.' }); }
       break;
     }
-    case 'jail': goToJail(game, pid, ev, 'Chance card'); break;
+    case 'jail': goToJail(game, pid, ev, 'Locker Room Draw'); break;
     default: break;
   }
-  ev.push({ t: 'log', text: `${name} drew ${deck === 'chance' ? 'Chance' : 'Community Chest'}: ${card.text}` });
+  ev.push({ t: 'log', text: `${name} drew ${deck === 'chance' ? 'Locker Room Draw' : 'Clubhouse Vault'}: ${card.text}` });
 }
 
 function noteBust(game, pid, r, ev) {
@@ -237,15 +237,15 @@ function noteBust(game, pid, r, ev) {
 
 const monopoly = {
   id: 'monopoly',
-  name: 'Turf Monopoly',
+  name: 'Turf Tycoon',
   tagline: 'Buy the fairway. Charge rent on the green.',
-  icon: '🎩',
+  icon: '💰',
   description:
-    'Everyone starts with $1,500. Each hole is a colour group: its fairway is split into deeds (Lane / Avenue / Row) plus the Green, priced by yardage. ' +
+    'Everyone starts with $1,500. Each hole is a resort group: its fairway is split into deeds (Lane / Avenue / Row) plus the Green, priced by yardage. ' +
     'Land a non-putt shot on an unowned deed to buy it (Buy/Pass appears under the radar — decide before your next shot). Land on a rival\'s deed and pay rent ' +
-    'immediately (double if they own the whole hole). Rough = just visiting. Sand = $50 tax, OB = $100 Luxury Tax (both into the Free Parking jackpot). ' +
-    'Water = Go to Jail: your next shot earns nothing and unpaid bail halves your salary. Bullseye or chip-in = Chance card + the jackpot; holing a putt = Community Chest. ' +
-    'Finishing a hole pays salary: $400 eagle · $300 birdie · $200 par · $100 bogey. Short of cash? Deeds auto-mortgage; still short = bankrupt. Highest net worth wins.',
+    'immediately (double if they own the whole hole with a Tycoon bonus). Rough = just visiting. Sand = $50 hazard tax, OB = $100 Luxury Tax (both into the Free Parking jackpot). ' +
+    'Water = Go to Penalty Box: your next shot earns nothing and unpaid penalty halves your salary. Bullseye or chip-in = Locker Room Draw + the jackpot; holing a putt = Clubhouse Vault. ' +
+    'Finishing a hole pays Clubhouse Turn salary: $400 eagle · $300 birdie · $200 par · $100 bogey. Short of cash? Deeds auto-mortgage; still short = bankrupt. Highest net worth wins.',
   minPlayers: 1,
   maxPlayers: 4,
   needsRival: true,
@@ -309,7 +309,7 @@ const monopoly = {
         ms.ledger[o.pid].rentEarned += r.paid;
         ms.last = `${player.name} paid $${r.paid} rent to ${nameOf(game, o.pid)} on ${deed.name}`;
         ev.push({ t: 'sfx', name: 'register' }, { t: 'haptic', pattern: [30, 30, 30] },
-          { t: 'banner', text: `RENT $${r.paid}`, sub: `${player.name} → ${nameOf(game, o.pid)} · ${deed.name}${hasMonopoly(game, o.pid, deed.hole) ? ' (monopoly ×2)' : ''}`, color: deed.color },
+          { t: 'banner', text: `RENT $${r.paid}`, sub: `${player.name} → ${nameOf(game, o.pid)} · ${deed.name}${hasMonopoly(game, o.pid, deed.hole) ? ' (tycoon ×2)' : ''}`, color: deed.color },
           { t: 'log', text: ms.last });
         noteBust(game, pid, r, ev);
       }
@@ -324,14 +324,14 @@ const monopoly = {
       noteBust(game, pid, r, ev);
     } else if (k === 'water') {
       goToJail(game, pid, ev, 'Splash! Water hazard');
-      ev.push({ t: 'log', text: `${player.name} went to jail (water)` });
+      ev.push({ t: 'log', text: `${player.name} went to penalty box (water)` });
     }
 
     // Wild cards
     if (!isBankrupt(game, pid)) {
       const chip = shot.holed && !isPutt;
       if (shot.zone === 'bullseye' || chip) {
-        if (jailed) ev.push({ t: 'toast', text: 'Bullseye from jail — no card this time.' });
+        if (jailed) ev.push({ t: 'toast', text: 'Bullseye from penalty box — no card this time.' });
         else {
           if (ms.pot > 0) {
             ev.push({ t: 'sfx', name: 'register' }, { t: 'banner', text: 'FREE PARKING!', sub: `${player.name} scoops the $${ms.pot} jackpot`, color: '#9be15d' });
@@ -341,7 +341,7 @@ const monopoly = {
           applyCard(game, pid, drawCard(game, 'chance'), 'chance', holeIdx, ev);
         }
       } else if (shot.holed) {
-        if (jailed) ev.push({ t: 'toast', text: 'Holed from jail — no Community Chest.' });
+        if (jailed) ev.push({ t: 'toast', text: 'Holed from penalty box — no Clubhouse Vault.' });
         else applyCard(game, pid, drawCard(game, 'chest'), 'chest', holeIdx, ev);
       }
     }
@@ -364,14 +364,14 @@ const monopoly = {
       if (ms.jail[p.id]) {
         sal = Math.floor(sal / 2);
         ms.jail[p.id] = false;
-        ev.push({ t: 'toast', text: `${p.name} pays bail out of salary (half pay).` });
+        ev.push({ t: 'toast', text: `${p.name} pays penalty out of salary (half pay).` });
       }
       ms.cash[p.id] += sal;
       ms.ledger[p.id].salary += sal;
       if (sal) parts.push(`${p.name} +$${sal}`);
     }
     ms.history.push({ hole: ctx.holeIdx, cash: { ...ms.cash }, worth: Object.fromEntries(game.players.map((p) => [p.id, netWorth(game, p.id)])) });
-    ev.push({ t: 'sfx', name: 'register' }, { t: 'toast', text: parts.length ? `Salary day: ${parts.join(' · ')}` : 'No salaries this hole.' });
+    ev.push({ t: 'sfx', name: 'register' }, { t: 'toast', text: parts.length ? `Clubhouse Turn: ${parts.join(' · ')}` : 'No salaries this hole.' });
     return ev;
   },
 
@@ -382,7 +382,7 @@ const monopoly = {
       const deeds = ownedBy(game, p.id).length;
       return {
         pid: p.id, value: bust ? 'BUST' : `$${formatNum(ms.cash[p.id])}`, label: bust ? 'bankrupt' : `net $${formatNum(netWorth(game, p.id))}`,
-        badge: bust ? null : ms.jail[p.id] ? 'JAIL' : ms.pending[p.id] ? 'BUY?' : deeds ? `${deeds} deed${deeds > 1 ? 's' : ''}` : null,
+        badge: bust ? null : ms.jail[p.id] ? 'PENALTY' : ms.pending[p.id] ? 'BUY?' : deeds ? `${deeds} deed${deeds > 1 ? 's' : ''}` : null,
       };
     });
   },
@@ -533,10 +533,10 @@ function renderPanel(container, game, api) {
       tokenSVG(tokenOf(p, i), p.color, 26),
       el('span', { class: 'mp-wallet-name' }, p.name),
       el('strong', {}, isBankrupt(game, p.id) ? 'BUST' : `$${formatNum(ms.cash[p.id])}`),
-      ms.jail[p.id] ? el('span', { class: 'mp-flag is-jail' }, 'Jail') : null,
+      ms.jail[p.id] ? el('span', { class: 'mp-flag is-jail' }, 'Penalty') : null,
       ms.goojf[p.id] ? el('span', { class: 'mp-flag' }, `Free ×${ms.goojf[p.id]}`) : null)));
 
-  container.append(el('section', { class: 'bw-panel bw-panel--monopoly', 'aria-label': 'Turf Monopoly status' },
+  container.append(el('section', { class: 'bw-panel bw-panel--monopoly', 'aria-label': 'Turf Tycoon status' },
     el('div', { class: 'bw-panel-head' }, el('h2', {}, `Hole ${idx + 1} · ${GROUPS[idx % GROUPS.length].name} group`)),
     prompts.length ? el('div', { class: 'bw-buy-list' }, prompts) : null,
     status,
@@ -577,7 +577,7 @@ function bankScene(game, ctx) {
       // felt table + logo stripe
       c.fillStyle = 'rgba(0,0,0,0.18)';
       c.fillRect(0, h * 0.08, w, 30);
-      drawLabel(c, 'TURF MONOPOLY · BANK STATEMENT', w / 2, h * 0.08 + 15, { size: 15, color: '#ffd84a', stroke: '#2a1d10' });
+      drawLabel(c, 'TURF TYCOON · BANK STATEMENT', w / 2, h * 0.08 + 15, { size: 15, color: '#ffd84a', stroke: '#2a1d10' });
       const n = players.length;
       const colW = (w - 24) / n;
       players.forEach((p, i) => {

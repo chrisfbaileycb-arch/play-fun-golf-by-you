@@ -15,25 +15,33 @@ export const assert = {
   lt(a, b, msg) { if (!(a < b)) throw new Error(msg || `expected ${a} < ${b}`); },
 };
 
-export async function run(root) {
+export async function run(root = null) {
   const results = [];
   for (const t of tests) {
     try { await t.fn(); results.push({ ...t, ok: true }); } catch (e) { results.push({ ...t, ok: false, err: e && e.stack ? e.stack : String(e) }); }
   }
   const pass = results.filter((r) => r.ok).length;
-  window.__TEST_RESULTS__ = { pass, fail: results.length - pass, total: results.length, failures: results.filter((r) => !r.ok).map((r) => ({ file: r.file, name: r.name, err: r.err })) };
-  const h = document.createElement('h1');
-  h.textContent = `${pass}/${results.length} passed`;
-  h.style.color = pass === results.length ? '#3c3' : '#e33';
-  root.appendChild(h);
-  let file = null;
-  for (const r of results) {
-    if (r.file !== file) { file = r.file; const h2 = document.createElement('h2'); h2.textContent = file; root.appendChild(h2); }
-    const p = document.createElement('div');
-    p.textContent = `${r.ok ? '✔' : '✘'} ${r.name}${r.ok ? '' : ' — ' + r.err}`;
-    p.style.color = r.ok ? '#9c9' : '#f88';
-    p.style.whiteSpace = 'pre-wrap';
-    root.appendChild(p);
+  const resObj = { pass, fail: results.length - pass, total: results.length, failures: results.filter((r) => !r.ok).map((r) => ({ file: r.file, name: r.name, err: r.err })) };
+  if (typeof window !== 'undefined') window.__TEST_RESULTS__ = resObj;
+  if (root && typeof document !== 'undefined') {
+    const h = document.createElement('h1');
+    h.textContent = `${pass}/${results.length} passed`;
+    h.style.color = pass === results.length ? '#3c3' : '#e33';
+    root.appendChild(h);
+    let file = null;
+    for (const r of results) {
+      if (r.file !== file) { file = r.file; const h2 = document.createElement('h2'); h2.textContent = file; root.appendChild(h2); }
+      const p = document.createElement('div');
+      p.textContent = `${r.ok ? '✔' : '✘'} ${r.name}${r.ok ? '' : ' — ' + r.err}`;
+      p.style.color = r.ok ? '#9c9' : '#f88';
+      p.style.whiteSpace = 'pre-wrap';
+      root.appendChild(p);
+    }
+  } else {
+    for (const r of results) {
+      console.log(`${r.ok ? '✔' : '✘'} [${r.file}] ${r.name}${r.ok ? '' : ' — ' + r.err}`);
+    }
+    console.log(`\n${pass}/${results.length} tests passed.`);
   }
-  return window.__TEST_RESULTS__;
+  return resObj;
 }

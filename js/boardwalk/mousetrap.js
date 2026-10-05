@@ -1,10 +1,10 @@
-// Mode E: The Rube Goldberg Mouse Trap
+// Mode E: Rube's Golf Gizmo (Chain-Reaction Trap)
 import { el, clear } from '../core/util.js';
 import { sfx } from '../core/audio.js';
 
 export const STAGES = [
   { id: 1, name: 'Crank & Gears', desc: 'Fairway Drive', icon: '⚙️', sfx: 'crank' },
-  { id: 2, name: 'Plastic Boot', desc: 'Solid Approach', icon: '🥾', sfx: 'bootKick' },
+  { id: 2, name: 'Golf Boot', desc: 'Solid Approach', icon: '🥾', sfx: 'bootKick' },
   { id: 3, name: 'Marble Stairs', desc: 'Sand Escape', icon: '⚪', sfx: 'marble' },
   { id: 4, name: 'Wash Tub Pole', desc: 'Putt on Target', icon: '🛁', sfx: 'tub' },
   { id: 5, name: 'Snap Cage', desc: 'Drained Cup', icon: '🪤', sfx: 'cage' },
@@ -12,10 +12,10 @@ export const STAGES = [
 
 export const mousetrap = {
   id: 'mousetrap',
-  name: 'Mouse Trap Contraption',
-  tagline: 'Build the 5-stage kinetic contraption to snap the cage on opponents!',
-  icon: '🪤',
-  description: 'Golf milestones trigger mechanical chain reactions: Crank & Gears → Plastic Boot → Marble Stairs → Wash Tub → SNAP CAGE over opponent pawns!',
+  name: "Rube's Golf Gizmo",
+  tagline: 'Build the 5-stage kinetic chain-reaction gizmo to trap opponent pawns!',
+  icon: '⚙️',
+  description: 'Golf milestones trigger mechanical chain reactions: Crank & Gears → Golf Boot → Marble Stairs → Wash Tub → SNAP CAGE over opponent pawns!',
   minPlayers: 1,
   maxPlayers: 4,
   needsRival: false,
@@ -104,7 +104,7 @@ export const mousetrap = {
     const rows = game.players.map((p) => {
       const score = game.modeState.players?.[p.id]?.score ?? 0;
       const traps = game.modeState.players?.[p.id]?.trapsTriggered ?? 0;
-      return { pid: p.id, score, display: `${score} pts (${traps} Traps Snapped)` };
+      return { pid: p.id, score, display: `${score} pts (${traps} Gizmos Snapped)` };
     });
     rows.sort((a, b) => b.score - a.score);
     return rows;
@@ -117,7 +117,7 @@ export const mousetrap = {
       const ps = game.modeState.players?.[p.id] || { stage: 0 };
       wrap.appendChild(el('div', { class: 'kg-panel-cell', style: { borderLeft: `4px solid ${p.color}`, paddingLeft: '8px' } },
         el('span', { class: 'kg-panel-label' }, p.name),
-        el('span', { class: 'kg-panel-val' }, `Contraption: ${ps.stage} / 5 Parts`),
+        el('span', { class: 'kg-panel-val' }, `Gizmo: ${ps.stage} / 5 Parts`),
         el('div', { style: { display: 'flex', gap: '4px', marginTop: '4px' } },
           ...STAGES.map((s, idx) => el('span', {
             style: {
