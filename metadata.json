@@ -1,0 +1,8 @@
+{
+  "name": "Arcade Links — Knight Golf & Boardwalk Links",
+  "description": "Arcade Links — Knight Golf & Boardwalk Links. Turn any real golf course into an arcade: target rings, knight duels and retro board games.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
