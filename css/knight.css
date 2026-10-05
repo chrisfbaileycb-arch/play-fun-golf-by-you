@@ -1,0 +1,198 @@
+/* Knight Golf Theme: Parchment, Iron, Heraldic Gold, Medieval Scroll */
+body[data-theme='knight'] {
+  --bg: #120e0a;
+  --bg-2: #1c1610;
+  --surface: #271f16;
+  --surface-2: #34291e;
+  --ink: #fcf4dd;
+  --ink-dim: #c7b99c;
+  --accent: #f4c55a;
+  --accent-ink: #1f1402;
+  --danger: #e74c3c;
+  --ok: #2ecc71;
+  --line: rgba(244, 197, 90, 0.22);
+  --font-display: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+body[data-theme='knight'] .brand {
+  letter-spacing: 0.12em;
+  font-family: var(--font-display);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+body[data-theme='knight'] .hole-title {
+  font-family: var(--font-display);
+  color: #fce8a6;
+  letter-spacing: 0.04em;
+}
+
+/* Medieval Scroll for Post-Round Summary */
+.parchment-scroll-wrap {
+  perspective: 1000px;
+  margin: 16px auto;
+  max-width: 680px;
+  padding: 10px;
+}
+
+.parchment-scroll {
+  background: #f4e8c1;
+  background-image: radial-gradient(#dcc28a 12%, transparent 14%), radial-gradient(#e4cf9f 12%, transparent 14%);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+  color: #2c1d0b;
+  border-left: 12px solid #6b4c24;
+  border-right: 12px solid #6b4c24;
+  border-radius: 8px;
+  padding: 32px 28px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), inset 0 0 50px rgba(139, 87, 26, 0.35);
+  position: relative;
+  transform-origin: top center;
+  animation: scrollUnroll 850ms cubic-bezier(0.18, 0.89, 0.32, 1.15) both;
+}
+
+@keyframes scrollUnroll {
+  0% {
+    transform: scaleY(0.08) rotateX(-25deg);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scaleY(1) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+.scroll-header {
+  text-align: center;
+  border-bottom: 2px dashed #8c6838;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.scroll-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  font-weight: 900;
+  color: #5c1813;
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.scroll-subtitle {
+  font-size: 1.1rem;
+  color: #634720;
+  font-style: italic;
+  margin: 0;
+}
+
+.scroll-seal {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px;
+  background: #96281b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.3), 0 4px 10px rgba(0, 0, 0, 0.4);
+  border: 3px solid #63170d;
+}
+
+.scroll-standings {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-family: var(--font-display);
+}
+
+.scroll-standings th {
+  text-align: left;
+  border-bottom: 2px solid #785324;
+  padding: 8px 6px;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #4f3312;
+}
+
+.scroll-standings td {
+  padding: 12px 6px;
+  border-bottom: 1px solid rgba(120, 83, 36, 0.25);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.scroll-titles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 2px dashed #8c6838;
+}
+
+.scroll-title-card {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid #c2a16d;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.scroll-title-name {
+  font-family: var(--font-display);
+  font-weight: 900;
+  color: #7d1f14;
+  font-size: 1.05rem;
+  margin: 0 0 4px 0;
+}
+
+.scroll-title-recipient {
+  font-weight: 800;
+  color: #271a0c;
+  font-size: 1rem;
+}
+
+.scroll-title-desc {
+  font-size: 0.85rem;
+  color: #574020;
+  margin-top: 2px;
+}
+
+.scroll-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.scroll-actions .btn {
+  flex: 1 1 calc(50% - 10px);
+}
+
+/* Status Panel */
+.kg-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+.kg-panel-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.kg-panel-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  font-weight: 800;
+}
+.kg-panel-val {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--accent);
+}

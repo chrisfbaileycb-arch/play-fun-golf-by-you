@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="theme-color" content="#14110d">
+  <meta name="description" content="Arcade Links — Knight Golf & Boardwalk Links. Turn any real golf course into an arcade: target rings, knight duels and retro board games.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>Arcade Links — Knight Golf &amp; Boardwalk Links</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="launch">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="app">
+    <header class="topbar">
+      <button class="icon-btn" id="btn-home" type="button" aria-label="Home menu" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+      </button>
+      <div class="brand" id="brand">Arcade Links</div>
+      <button class="icon-btn" id="btn-mute" type="button" aria-label="Mute sound" aria-pressed="false">
+        <svg class="ico-sound" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg class="ico-muted" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM16 9l6 6M22 9l-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+
+    <main id="main">
+      <!-- LAUNCHER -->
+      <section class="view" id="view-launch" aria-labelledby="launch-title">
+        <div class="launch-hero">
+          <p class="eyebrow">The arcade is wherever the flag is</p>
+          <h1 id="launch-title">Arcade <span>Links</span></h1>
+          <p class="lede">Play any real 9-hole, par-3 or municipal course like Topgolf. Pick your arcade:</p>
+        </div>
+        <div class="suite-cards" id="suite-cards"></div>
+        <div class="launch-actions">
+          <button class="btn btn-ghost" id="btn-resume" type="button" hidden>Resume saved round</button>
+          <label class="btn btn-ghost file-btn">Import round JSON<input type="file" id="import-file" accept="application/json,.json" hidden></label>
+        </div>
+        <p class="fineprint">Works offline after the first visit. Install it to your home screen for the cart.</p>
+      </section>
+
+      <!-- LOBBY -->
+      <section class="view" id="view-lobby" aria-labelledby="lobby-title" hidden>
+        <h1 id="lobby-title" class="view-title">Match Lobby</h1>
+        <div class="lobby-block">
+          <h2 class="block-title">Players <small id="player-count"></small></h2>
+          <div class="player-list" id="player-list"></div>
+          <div class="row gap">
+            <button class="btn btn-ghost" id="btn-add-player" type="button">+ Add player</button>
+            <button class="btn btn-ghost" id="btn-add-cpu" type="button">+ Add CPU rival</button>
+          </div>
+        </div>
+        <div class="lobby-block">
+          <h2 class="block-title">Match format</h2>
+          <div class="mode-grid" id="mode-grid"></div>
+        </div>
+        <div class="sticky-actions">
+          <button class="btn btn-ghost" id="btn-lobby-back" type="button">Back</button>
+          <button class="btn btn-primary" id="btn-lobby-next" type="button">Choose course →</button>
+        </div>
+      </section>
+
+      <!-- COURSE -->
+      <section class="view" id="view-course" aria-labelledby="course-title" hidden>
+        <h1 id="course-title" class="view-title">Course</h1>
+        <div id="course-step"></div>
+        <div class="sticky-actions">
+          <button class="btn btn-ghost" id="btn-course-back" type="button">Back</button>
+          <button class="btn btn-primary" id="btn-course-start" type="button">Tee off →</button>
+        </div>
+      </section>
+
+      <!-- MODE SETUP -->
+      <section class="view" id="view-setup" aria-labelledby="setup-title" hidden>
+        <h1 id="setup-title" class="view-title">Setup</h1>
+        <div id="setup-step"></div>
+      </section>
+
+      <!-- HOLE -->
+      <section class="view" id="view-hole" aria-labelledby="hole-title" hidden>
+        <div class="hud" id="hud" aria-label="Leaderboard"></div>
+        <div class="hole-head">
+          <div>
+            <h1 id="hole-title" class="hole-title">Hole 1</h1>
+            <p class="hole-meta" id="hole-meta"></p>
+          </div>
+          <div class="hole-dist" id="hole-dist" aria-live="polite"></div>
+        </div>
+        <div class="radar-wrap">
+          <canvas id="radar" class="radar" role="img" aria-label="Top-down hole radar. Tap to place the ball landing spot."></canvas>
+          <div class="radar-chips">
+            <button class="chip" id="btn-gps" type="button" aria-pressed="false">GPS off</button>
+            <span class="chip chip-info" id="lie-chip"></span>
+          </div>
+        </div>
+        <div class="mode-panel" id="mode-panel"></div>
+
+        <div class="recorder" id="recorder" aria-label="Shot entry">
+          <div class="turn-row" id="turn-row" role="tablist" aria-label="Player to record"></div>
+          <div class="rec-section">
+            <h2 class="rec-label">Shot type</h2>
+            <div id="shot-types"></div>
+          </div>
+          <div class="rec-section">
+            <h2 class="rec-label">Where did it land? <small>(or tap the radar)</small></h2>
+            <div class="zone-grid" id="zone-grid"></div>
+          </div>
+          <div class="rec-section">
+            <div class="slider-row">
+              <label for="carry" class="rec-label">Carry <output id="carry-out">0</output> yds</label>
+              <input type="range" id="carry" min="0" max="320" step="1" value="150">
+            </div>
+            <details class="launch-monitor">
+              <summary>Launch monitor input</summary>
+              <div class="lm-grid">
+                <label>Carry (yds)<input type="number" id="lm-carry" min="0" max="400" inputmode="numeric"></label>
+                <label>Off-line (yds, − left / + right)<input type="number" id="lm-offline" min="-80" max="80" inputmode="numeric"></label>
+                <button class="btn btn-ghost" id="btn-lm-apply" type="button">Plot shot</button>
+              </div>
+            </details>
+          </div>
+          <div class="rec-actions">
+            <button class="btn btn-ghost" id="btn-undo" type="button">Undo</button>
+            <button class="btn btn-ghost" id="btn-sim" type="button" title="Simulate a realistic shot (indoor/demo play)">Sim shot</button>
+            <button class="btn btn-ghost" id="btn-mark" type="button" hidden>Mark GPS ball</button>
+            <button class="btn btn-primary btn-xl" id="btn-record" type="button">Record shot</button>
+          </div>
+          <ol class="shot-log" id="shot-log" aria-label="Shot log"></ol>
+        </div>
+      </section>
+
+      <!-- SCENE -->
+      <section class="view view-scene" id="view-scene" aria-labelledby="scene-title" hidden>
+        <h1 id="scene-title" class="scene-title">Battle</h1>
+        <canvas id="scene-canvas" class="scene-canvas" role="img" aria-label="Animated battle scene"></canvas>
+        <p class="scene-caption" id="scene-caption" aria-live="polite"></p>
+        <div class="scene-actions">
+          <button class="btn btn-ghost" id="btn-scene-skip" type="button">Skip</button>
+        </div>
+      </section>
+
+      <!-- SUMMARY -->
+      <section class="view" id="view-summary" aria-labelledby="summary-title" hidden>
+        <h1 id="summary-title" class="visually-hidden">Final results</h1>
+        <div id="summary"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="banner-host" aria-hidden="true"></div>
+  <div id="toast-host"></div>
+  <div id="live" class="visually-hidden" aria-live="assertive" aria-atomic="true"></div>
+  <noscript><p class="noscript">Arcade Links needs JavaScript enabled.</p></noscript>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
